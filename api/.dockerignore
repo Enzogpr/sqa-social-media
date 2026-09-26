@@ -1,0 +1,26 @@
+# Dependências e arquivos de build do Maven
+target/
+!target/*.jar
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE e editor
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Logs
+*.log
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Documentação (não precisa dentro da imagem)
+README.md

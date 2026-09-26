@@ -1,49 +1,51 @@
 # SQA Social Media
 
-Projeto educacional com uma API Spring Boot e um frontend Next.js.
+Projeto educacional com uma API Spring Boot e um frontend Next.js, totalmente containerizado com Docker.
 
 ## Visão Geral
 
 - `api/`: backend Java 17 com Spring Boot, autenticação, usuários, posts e curtidas.
 - `client/`: frontend Next.js/React que consome a API.
+- `db`: banco de dados MySQL 8.
 
-Principais rotas da aplicação:
-
-- Frontend: `http://localhost:3000`
-- API: `http://localhost:8080`
+Principais rotas da aplicação após execução:
+- Frontend: http://localhost:3000
+- API: http://localhost:8080
 
 ## Como Rodar
 
-Pré-requisitos:
+**Pré-requisitos:**
+- Docker e Docker Compose instalados.
+- Git.
 
-- Java 17+
-- Node.js 18+
-- npm
-- MySQL configurado para o ambiente de desenvolvimento
+Siga os passos abaixo para iniciar a aplicação:
 
-API:
-
+1. Clone o repositório:
 ```bash
-cd api
-./mvnw spring-boot:run
+git clone https://github.com/Enzogpr/sqa-social-media.git
+cd sqa-social-media
 ```
 
-Frontend:
-
+2. Configure as variáveis de ambiente a partir do exemplo:
 ```bash
-cd client
-npm install
-npm run dev
+cp .env.example .env
+```
+*(O arquivo `.env.example` já possui credenciais padrão para rodar o banco localmente)*
+
+3. Inicie os containers em segundo plano:
+```bash
+docker compose up -d --build
+```
+Aguarde alguns instantes até que o banco de dados inicialize e a API se conecte a ele. O ambiente estará totalmente no ar.
+
+## Como Parar
+
+Para parar a execução dos containers:
+```bash
+docker compose down
 ```
 
-O frontend usa `NEXT_PUBLIC_BASE_URL` para definir a URL da API. Exemplo de `.env` em `client/`:
+## Autores
 
-```env
-NEXT_PUBLIC_BASE_URL=http://localhost:8080
-```
+- Enzo - GitHub: @Enzogpr
 
-## Documentações
-
-- [README da API](api/README.md)
-- [README do Frontend](client/README.md)
-- [DummyJSON API Docs](https://dummyjson.com/docs)

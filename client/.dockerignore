@@ -1,0 +1,27 @@
+# Dependências
+node_modules/
+
+# Build do Next.js
+.next/
+
+# Git
+.git
+.gitignore
+
+# Testes
+__tests__/
+*.test.ts
+*.test.tsx
+jest.config.ts
+coverage/
+
+# IDE e editor
+.idea/
+.vscode/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Documentação
+README.md
