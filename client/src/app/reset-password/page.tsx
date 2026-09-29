@@ -45,12 +45,8 @@ export default function ResetPassword() {
     try {
       await authService.resetPassword({ email });
       setSuccessMessage(
-        "Email enviado com sucesso para alterar a senha! Redirecionando..."
+        "E-mail enviado com sucesso"
       );
-
-      setTimeout(() => {
-        router.push("/signin");
-      }, 2000);
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         setError(

@@ -43,7 +43,7 @@ public class AuthController {
     if (service.findByEmail(userDTO.getEmail()) != null) {
       return ResponseEntity
           .status(409)
-          .body(new ErrorResponse("E-mail já está em uso", 409));
+          .body(new ErrorResponse("E-mail já cadastrado", 409));
     }
 
     User createdUser = service.createUser(userDTO.getEmail(), userDTO.getPassword());
@@ -54,14 +54,14 @@ public class AuthController {
   public ResponseEntity<?> signin(@RequestBody UserDTO userDTO) {
     if (!service.isEmailValid(userDTO.getEmail())) {
       return ResponseEntity
-          .status(422)
-          .body(new ErrorResponse("E-mail inválido", 422));
+          .status(401)
+          .body(new ErrorResponse("Credenciais inválidas", 401));
     }
 
     if (!service.isPasswordValid(userDTO.getPassword())) {
       return ResponseEntity
-          .status(422)
-          .body(new ErrorResponse("Senha inválida", 422));
+          .status(401)
+          .body(new ErrorResponse("Credenciais inválidas", 401));
     }
 
     User user = service.findByEmail(userDTO.getEmail());
