@@ -48,6 +48,8 @@ docker compose down
 
 ## Testes e integração contínua
 
+Na branch `feature/likes-dislikes`, a Home também mostra as curtidas e descurtidas de cada postagem a partir de `reactions.likes` e `reactions.dislikes` da DummyJSON. O desenvolvimento dessa funcionalidade está separado da consolidação de testes na `main`.
+
 Os testes das atividades anteriores estão organizados em:
 
 - `api/src/test/java`: testes Java com JUnit, Mockito e MockMvc.
