@@ -27,6 +27,11 @@ export interface Post {
   title: string;
   body: string;
   liked: boolean;
+  // Contadores globais fornecidos pelo DummyJSON, separados da curtida do usuário.
+  reactions: {
+    likes: number;
+    dislikes: number;
+  };
 }
 
 export interface PostsResponse {

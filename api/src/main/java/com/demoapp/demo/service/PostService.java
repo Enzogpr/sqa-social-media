@@ -17,10 +17,12 @@ public class PostService {
   private final RestTemplate restTemplate;
   private final ObjectMapper objectMapper;
 
-  public PostService(UserPostReactionRepository reactionRepository) {
+  // As dependências vêm do Spring; nos testes unitários, o HTTP pode ser controlado.
+  public PostService(UserPostReactionRepository reactionRepository,
+      RestTemplate restTemplate, ObjectMapper objectMapper) {
     this.reactionRepository = reactionRepository;
-    this.restTemplate = new RestTemplate();
-    this.objectMapper = new ObjectMapper();
+    this.restTemplate = restTemplate;
+    this.objectMapper = objectMapper;
   }
 
   public Map<String, Object> getPosts(Integer limit, Integer skip, Long userId) {
@@ -54,15 +56,8 @@ public class PostService {
       JsonNode postsArray = rootNode.get("posts");
       
       for (JsonNode postNode : postsArray) {
-        Map<String, Object> post = new HashMap<>();
         Long postId = postNode.get("id").asLong();
-        
-        post.put("id", postId);
-        post.put("title", postNode.get("title").asText());
-        post.put("body", postNode.get("body").asText());
-        post.put("liked", likedPostIds.contains(postId));
-        
-        posts.add(post);
+        posts.add(toPost(postNode, likedPostIds.contains(postId)));
       }
 
       Map<String, Object> result = new HashMap<>();
@@ -103,13 +98,7 @@ public class PostService {
         String response = restTemplate.getForObject(url, String.class);
         JsonNode postNode = objectMapper.readTree(response);
         
-        Map<String, Object> post = new HashMap<>();
-        post.put("id", postNode.get("id").asLong());
-        post.put("title", postNode.get("title").asText());
-        post.put("body", postNode.get("body").asText());
-        post.put("liked", true);
-        
-        posts.add(post);
+        posts.add(toPost(postNode, true));
       }
 
       Map<String, Object> result = new HashMap<>();
@@ -123,6 +112,21 @@ public class PostService {
     } catch (Exception e) {
       throw new RuntimeException("Erro ao buscar posts curtidos: " + e.getMessage(), e);
     }
+  }
+
+  // Mantém o objeto reactions do DummyJSON em todas as respostas de posts.
+  // Os contadores globais não são a curtida pessoal, armazenada no campo liked.
+  private Map<String, Object> toPost(JsonNode postNode, boolean liked) {
+    Map<String, Object> post = new HashMap<>();
+    post.put("id", postNode.get("id").asLong());
+    post.put("title", postNode.get("title").asText());
+    post.put("body", postNode.get("body").asText());
+    post.put("liked", liked);
+    JsonNode reactions = postNode.path("reactions");
+    post.put("reactions", Map.of(
+        "likes", reactions.path("likes").asInt(0),
+        "dislikes", reactions.path("dislikes").asInt(0)));
+    return post;
   }
 
   public Map<String, Object> toggleLike(Long postId, Long userId) {

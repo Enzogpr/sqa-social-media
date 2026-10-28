@@ -2,6 +2,8 @@
 
 > Atividade 4: a suíte anterior foi preservada e os defeitos de senha, labels, preparação de mocks e persistência da sessão foram corrigidos para a integração contínua. `RESULTADOS.md` e os roteiros de gravação mantêm o histórico das atividades anteriores. O workflow atual está em `.github/workflows/ci.yml`.
 
+Na branch `feature/likes-dislikes`, a suíte Playwright tem **6 testes de API e 4 E2E**: os oito anteriores e dois casos de regressão para os contadores. Veja [CI.md](./CI.md) para o fluxo de branches e a arquitetura da funcionalidade.
+
 Projeto independente de testes em TypeScript com Playwright, criado do zero pelo instalador oficial. As aplicações em `../api` e `../client` são testadas em execução. Os testes usam somente HTTP e a interface do navegador: não importam código das aplicações, não acessam o banco diretamente e não interceptam respostas com mocks.
 
 Para uma explicação rápida de onde está cada teste e como funciona, leia o [resumo dos testes](./RESUMO-DOS-TESTES.md). Para estudar cada etapa e demonstrar ao professor, siga o [roteiro de apresentação](./APRESENTACAO.md). Os arquivos de configuração, testes, auxiliares e execução local têm comentários explicativos em português.
@@ -80,7 +82,7 @@ Em `tests`:
 npm run test:local
 ```
 
-Esse comando inicia a API em `http://localhost:8081` e o frontend em `http://localhost:3001`, executa os 8 testes e encerra os servidores. As portas devem estar livres. O banco H2 fica em memória e seus dados são descartados quando a API termina. O driver H2 já existe nas dependências de teste da API; `spring-boot.run.useTestClasspath=true` o disponibiliza em execução. Esse modo executa a aplicação real e mantém as configurações locais de MySQL intactas.
+Esse comando inicia a API em `http://localhost:8081` e o frontend em `http://localhost:3001`, executa os testes e encerra os servidores. As portas devem estar livres. O banco H2 fica em memória e seus dados são descartados quando a API termina. O driver H2 já existe nas dependências de teste da API; `spring-boot.run.useTestClasspath=true` o disponibiliza em execução. Esse modo executa a aplicação real e mantém as configurações locais de MySQL intactas.
 
 Também é possível filtrar casos:
 
@@ -103,6 +105,8 @@ O modo local inicia ambos os servidores mesmo ao filtrar somente a API. Para tes
 | API-03 | HTTP | Login válido: HTTP 200 e identificação do usuário cadastrado. |
 | API-04 | HTTP | Senha incorreta, mas com formato válido: HTTP 401 e mensagem de credenciais inválidas. |
 | API-05 | HTTP | E-mail sem arroba: HTTP 422 e mensagem de e-mail inválido. |
+| API-06 | HTTP | Compara os contadores do feed com `reactions` da API real do DummyJSON. |
+| E2E-04 | Navegador | Confere título, likes e dislikes de cada card da Home com a resposta recebida da API. |
 
 As senhas de preparação atendem às validações atuais do frontend e backend. Os testes de erros verificam tanto o status HTTP quanto o corpo retornado. Cada teste do navegador começa com um contexto limpo e faz login pela interface, sem injetar sessão no localStorage. Os seletores usam botões e títulos por papel/texto e campos do formulário por placeholder e tipo. Os labels também foram associados aos inputs na consolidação dos testes.
 
@@ -124,8 +128,10 @@ Não há `test.skip`, `test.fail` nem tentativas automáticas: uma regressão fa
 
 ```text
 tests/
-  api/auth.spec.ts             # 5 testes de API
-  e2e/user-flows.spec.ts       # 3 testes E2E
+  api/auth.spec.ts             # 5 testes anteriores de autenticação
+  api/posts.spec.ts            # Regressão dos contadores na API
+  e2e/user-flows.spec.ts       # 3 fluxos anteriores
+  e2e/post-reactions.spec.ts   # Contadores na Home
   support/fixtures.ts          # Contexto HTTP separado para os E2E
   support/users.ts             # Dados exclusivos e preparação via API
   scripts/test-local.cjs       # Execução com servidores temporários

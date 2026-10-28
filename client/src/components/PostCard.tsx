@@ -77,6 +77,15 @@ export default function PostCard({
         {post.body}
       </p>
 
+      {/* A Home reutiliza este card; os números vêm de post.reactions na API. */}
+      <p
+        aria-label="Reações do post"
+        style={{ display: "flex", gap: "1.5rem", color: "var(--foreground)" }}
+      >
+        <span data-testid="post-likes">👍 {post.reactions.likes} curtidas</span>
+        <span data-testid="post-dislikes">👎 {post.reactions.dislikes} descurtidas</span>
+      </p>
+
       <div
         style={{
           display: "flex",

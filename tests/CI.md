@@ -38,3 +38,20 @@ Foram corrigidos os comportamentos detectados pelos testes: mínimo de oito cara
 5. Enviar somente o link do repositório, conforme o enunciado. Manter o PR aberto para avaliação.
 
 Uma validação local não substitui a execução no GitHub Actions: a entrega exige a execução remota verde vinculada ao PR.
+
+## Feature de likes e dislikes
+
+Os contadores seguem o contrato do DummyJSON: `reactions.likes` e `reactions.dislikes`. A API preserva esse objeto ao montar os posts do feed e dos posts curtidos, e o tipo `Post` do frontend declara os dois números. O `PostCard`, usado na Home, exibe ambos os valores, inclusive zero.
+
+O campo `liked` continua representando a curtida pessoal do usuário na aplicação. Os números em `reactions` são os valores globais recebidos do DummyJSON; clicar no botão de curtida pessoal não envia alterações para a API externa.
+
+A feature acrescenta sete casos, mantendo todos os anteriores:
+
+- 3 testes Java de `PostService`: preservação dos dois números, ausência de `reactions` com padrão zero e contrato dos posts curtidos;
+- 2 testes Jest de `PostCard`: números diferentes e contadores iguais a zero;
+- 1 teste de API Playwright que compara o feed com a DummyJSON real;
+- 1 E2E que confere os contadores em todos os cards carregados na Home.
+
+Isso totaliza **9 testes Java, 8 testes Jest, 6 testes de API e 4 E2E**. Os testes unitários do serviço usam respostas HTTP controladas para verificar valores conhecidos. Os testes Playwright usam o backend e a DummyJSON reais.
+
+Em 28/10/2026, os 27 casos e o build do frontend passaram localmente. O E2E dos contadores também salva uma captura da Home no relatório Playwright, disponível nos artefatos da CI.
