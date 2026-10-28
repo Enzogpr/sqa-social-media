@@ -28,6 +28,13 @@ public class AuthController {
 
   @PostMapping("/signup")
   public ResponseEntity<?> signup(@RequestBody UserDTO userDTO) {
+    // Campos ausentes são um erro de entrada, antes das validações de formato.
+    if (userDTO.getEmail() == null || userDTO.getEmail().isBlank()
+        || userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
+      return ResponseEntity.badRequest()
+          .body(new ErrorResponse("E-mail e senha são obrigatórios", 400));
+    }
+
     if (!service.isEmailValid(userDTO.getEmail())) {
       return ResponseEntity
           .status(422)

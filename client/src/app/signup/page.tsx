@@ -137,7 +137,8 @@ export default function SignUp() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          {/* As mensagens de validação são apresentadas pela própria aplicação. */}
+          <form onSubmit={handleSubmit} noValidate>
             <Input
               label="Email"
               type="email"

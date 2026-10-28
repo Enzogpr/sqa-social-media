@@ -19,8 +19,10 @@ public class UserService {
   }
 
   public boolean isPasswordValid(String password) {
-    String passRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$";
-    return Pattern.matches(passRegex, password);
+    // A mesma regra do frontend: oito caracteres e pelo menos um de cada grupo.
+    // Pontuação como ponto e exclamação também conta como caractere especial.
+    String passRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9\\s]).{8,}$";
+    return password != null && Pattern.matches(passRegex, password);
   }
 
   public User createUser(String email, String password) {

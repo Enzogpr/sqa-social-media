@@ -7,7 +7,8 @@ export interface StoredUser {
 
 export function saveUser(user: StoredUser): void {
   if (typeof window !== "undefined") {
-    localStorage.setItem("user", JSON.stringify(user));
+    // Gravação, leitura e logout usam a mesma chave para manter a sessão após F5.
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
   }
 }
 

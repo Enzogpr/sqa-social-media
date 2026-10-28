@@ -1,0 +1,126 @@
+name: Testes de regressao
+
+# Cada abertura ou atualização de PR para main executa novamente toda a esteira.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Um novo commit cancela apenas a execução anterior do mesmo PR/branch.
+concurrency:
+  group: testes-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-tests:
+    name: API - unidade e integracao
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configurar Java 17 e cache Maven
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: api/pom.xml
+      - name: Executar todos os testes Java
+        run: bash ./mvnw --batch-mode --no-transfer-progress verify
+      - name: Guardar relatorios JUnit
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: testes-java
+          path: api/target/surefire-reports/
+          retention-days: 14
+
+  client-tests:
+    name: Cliente - unidade, integracao e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configurar Node.js 22 e cache npm
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - name: Instalar dependencias do cliente
+        run: npm ci
+      - name: Executar todos os testes Jest
+        run: npm test -- --ci --runInBand --coverage
+      - name: Validar build do frontend
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+      - name: Guardar cobertura Jest
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-cliente
+          path: client/coverage/
+          retention-days: 14
+
+  black-box-tests:
+    name: Playwright - API e E2E
+    needs: [api-tests, client-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tests
+    env:
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configurar Java 17 e cache Maven
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: api/pom.xml
+      - name: Configurar Node.js 22 e caches npm
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            tests/package-lock.json
+      - name: Instalar dependencias do frontend
+        run: npm ci --prefix ../client
+      - name: Instalar dependencias dos testes
+        run: npm ci
+      - name: Instalar Chromium e bibliotecas do Linux
+        run: npx playwright install --with-deps chromium
+      - name: Conferir tipos dos testes
+        run: npm run typecheck
+      # O webServer do Playwright inicia a API, o H2 em memória e o frontend.
+      # Ele aguarda os serviços responderem e os encerra mesmo quando um caso falha.
+      - name: Iniciar aplicacao e executar todos os testes de API e E2E
+        run: npm run test:local -- --workers=1
+      - name: Guardar relatorio, screenshots e traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-relatorio
+          path: |
+            tests/playwright-report/
+            tests/test-results/
+          retention-days: 14
